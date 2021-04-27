@@ -6,37 +6,39 @@ import (
 	"time"
 )
 
+type Register byte
+
 const (
-	regRHR       = 0x00 // Receive Holding Register (R)
-	regTHR       = 0x00 // Transmit Holding Register (W)
-	regIER       = 0x01 // Interrupt Enable Register (R/W)
-	regFCR       = 0x02 // FIFO Control Register (W)
-	regIIR       = 0x02 // Interrupt Identification Register (R)
-	regLCR       = 0x03 // Line Control Register (R/W)
-	regMCR       = 0x04 // Modem Control Register (R/W)
-	regLSR       = 0x05 // Line Status Register (R)
-	regMSR       = 0x06 // Modem Status Register (R)
-	regSPR       = 0x07 // Scratchpad Register (R/W)
-	regTCR       = 0x06 // Transmission Control Register (R/W)
-	regTLR       = 0x07 // Trigger Level Register (R/W)
-	regTXLVL     = 0x08 // Transmit FIFO Level Register (R)
-	regRXLVL     = 0x09 // Receive FIFO Level Register (R)
-	regIODIR     = 0x0A // I/O pin Direction Register (R/W)
-	regIOSTATE   = 0x0B // I/O pin States Register (R)
-	regIOINTENA  = 0x0C // I/O Interrupt Enable Register (R/W)
-	regIOCONTROL = 0x0E // I/O pins Control Register (R/W)
-	regEFCR      = 0x0F // Extra Features Register (R/W)
+	regRHR       Register = 0x00 // Receive Holding Register (R)
+	regTHR       Register = 0x00 // Transmit Holding Register (W)
+	regIER       Register = 0x01 // Interrupt Enable Register (R/W)
+	regFCR       Register = 0x02 // FIFO Control Register (W)
+	regIIR       Register = 0x02 // Interrupt Identification Register (R)
+	regLCR       Register = 0x03 // Line Control Register (R/W)
+	regMCR       Register = 0x04 // Modem Control Register (R/W)
+	regLSR       Register = 0x05 // Line Status Register (R)
+	regMSR       Register = 0x06 // Modem Status Register (R)
+	regSPR       Register = 0x07 // Scratchpad Register (R/W)
+	regTCR       Register = 0x06 // Transmission Control Register (R/W)
+	regTLR       Register = 0x07 // Trigger Level Register (R/W)
+	regTXLVL     Register = 0x08 // Transmit FIFO Level Register (R)
+	regRXLVL     Register = 0x09 // Receive FIFO Level Register (R)
+	regIODIR     Register = 0x0A // I/O pin Direction Register (R/W)
+	regIOSTATE   Register = 0x0B // I/O pin States Register (R)
+	regIOINTENA  Register = 0x0C // I/O Interrupt Enable Register (R/W)
+	regIOCONTROL Register = 0x0E // I/O pins Control Register (R/W)
+	regEFCR      Register = 0x0F // Extra Features Register (R/W)
 
 	// -- Special Register Set (Requires LCR[7] = 1 & LCR != 0xBF to use)
-	regDLL = 0x00 // Divisor Latch LSB (R/W)
-	regDLH = 0x01 // Divisor Latch MSB (R/W)
+	regDLL Register = 0x00 // Divisor Latch LSB (R/W)
+	regDLH Register = 0x01 // Divisor Latch MSB (R/W)
 
 	// -- Enhanced Register Set (Requires LCR = 0xBF to use)
-	regEFR   = 0x02 // Enhanced Feature Register (R/W)
-	regXON1  = 0x04 // XOn1 (R/W)
-	regXON2  = 0x05 // XOn2 (R/W)
-	regXOFF1 = 0x06 // XOff1 (R/W)
-	regXOFF2 = 0x07 // XOff2 (R/W)
+	regEFR   Register = 0x02 // Enhanced Feature Register (R/W)
+	regXON1  Register = 0x04 // XOn1 (R/W)
+	regXON2  Register = 0x05 // XOn2 (R/W)
+	regXOFF1 Register = 0x06 // XOff1 (R/W)
+	regXOFF2 Register = 0x07 // XOff2 (R/W)
 )
 
 type SC16IS7X0 struct {
@@ -91,15 +93,15 @@ const (
 	ParitySpace Parity = 'S' // parity bit is always 0
 )
 
-func (v *SC16IS7X0) readReg(reg byte) (byte, error) {
-	return v.dev.ReadRegU8(reg << 3)
+func (v *SC16IS7X0) readReg(reg Register) (byte, error) {
+	return v.dev.ReadRegU8(byte(reg) << 3)
 }
 
-func (v *SC16IS7X0) writeReg(reg byte, value byte) error {
-	return v.dev.WriteRegU8(reg<<3, value)
+func (v *SC16IS7X0) writeReg(reg Register, value byte) error {
+	return v.dev.WriteRegU8(byte(reg) << 3, value)
 }
 
-func (v *SC16IS7X0) updateRegBit(reg byte, flag byte, value bool) error {
+func (v *SC16IS7X0) updateRegBit(reg Register, flag byte, value bool) error {
 
 	flags, err := v.readReg(reg)
 	if err != nil {
@@ -114,7 +116,7 @@ func (v *SC16IS7X0) updateRegBit(reg byte, flag byte, value bool) error {
 	return v.writeReg(reg, flags)
 }
 
-func (v *SC16IS7X0) peekRegBit(reg byte, flag byte) (bool, error) {
+func (v *SC16IS7X0) peekRegBit(reg Register, flag byte) (bool, error) {
 	current, err := v.readReg(reg)
 	if err != nil {
 		return false, err
